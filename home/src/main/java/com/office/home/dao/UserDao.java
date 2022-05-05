@@ -6,8 +6,16 @@ public interface UserDao {
 
 	User loadByUsername(String username);
 
-	boolean existsByUsername(String username);
+	boolean existsByEmployeeId(int employeeId);
 
 	boolean existsByEmail(String email);
+
+	void registerUser(User user);
+
+	String getSecretQuestion(String username);
+
+	String getSecretAnswer(String username);
+
+	void changePassword(String username, String encodedPassword);
 
 }

@@ -18,16 +18,16 @@ import com.office.home.service.EmployeeService;
 
 @CrossOrigin(origins="http://localhost:3000")
 @RestController
-@RequestMapping("office")
+@RequestMapping("/office/employees")
 public class EmployeeController {
 	@Autowired
 	EmployeeService service;
 	
-	@GetMapping("/employees")
+	@GetMapping("/")
 	public List<Employee> getAllEmployees(){
 		return service.getAllEmployees();
 	}
-	@GetMapping("/employees/{id}")
+	@GetMapping("/{id}")
 	public Employee getEmployee(@PathVariable int id) {
 		try {
 			Employee emp =service.getEmployee(id);
@@ -39,7 +39,7 @@ public class EmployeeController {
 			return new ErrorEmployee(e);
 		}
 	}
-	@PostMapping("/employees/add")
+	@PostMapping("/add")
 	public String addEmployee(@RequestBody Employee emp) {
 		try {
 		return service.addEmployee(emp);
@@ -50,7 +50,7 @@ public class EmployeeController {
 			return null;
 		}
 	}
-	@PostMapping("employees/{id}/update")
+	@PostMapping("/{id}/update")
 	public Employee updateEmployee(@PathVariable("id") int id, @RequestBody Employee emp) {
 		try {
 			return service.updateEmployee(id,emp);
@@ -60,7 +60,7 @@ public class EmployeeController {
 			return new ErrorEmployee(e);
 		}
 	}
-	@DeleteMapping("employees/{id}/delete")
+	@DeleteMapping("/{id}/delete")
 	public Employee deleteEmployee(@PathVariable int id) {
 		try {
 			return service.deleteEmployee(id);

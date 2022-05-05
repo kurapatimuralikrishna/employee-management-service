@@ -1,4 +1,5 @@
 
+USE two_tables;
 INSERT INTO teams
 VALUES 
 	(1,"linux"),
@@ -10,23 +11,23 @@ VALUES
 INSERT INTO genders(id,gname)
 VALUES 
 	(1,"MALE"),
-    (2,"FEMALE")
+    (2,"FEMALE");
 
 INSERT INTO employees
 VALUES
 	(1,"Hari",2,1);
 
-INSERT INTO employees (full_name,team,gender)
+INSERT INTO employees (id,full_name,team,gender)
 VALUES
-	("Suresh",3,1),
-    ("Surya",1,1),
-    ("Naresh",4,1),
-    ("Aditya",5,1),
-    ("Kumari",2,2),
-    ("Priya",3,2),
-    ("Sita",4,2),
-    ("Jahnavi",5,2),
-    ("Kalpana",5,2);
+	(2,"Suresh",3,1),
+    (3,"Surya",1,1),
+    (4,"Naresh",4,1),
+    (5,"Aditya",5,1),
+    (6,"Kumari",2,2),
+    (7,"Priya",3,2),
+    (8,"Sita",4,2),
+    (9,"Jahnavi",5,2),
+    (10,"Kalpana",5,2);
 
 UPDATE employees
 SET 
@@ -50,7 +51,7 @@ VALUES
 
 UPDATE tasks
 SET
-	instructions = employee_id;
+	instructions = employee_id*employee_id;
 
 INSERT INTO salaries(employee_id,package)
 VALUES 
@@ -94,21 +95,50 @@ VALUES
 
 INSERT INTO users(username,user_password,email,employee_id)
 VALUES
-	("Kumari",
+	("6",
 	"$2a$12$25zic1HvD31VxhL8EWNs8emn6x1.VhvRyIk7di1kXxY8mWXFhMWIC",
-	"admin@office.com",
+	"6@office.com",
 	6);
 INSERT INTO user_roles(username,role_id)
 VALUES
-	("Kumari",3);
-
+	("6",3);
+INSERT INTO user_secrets(username,secret_question,secret_answer)
+VALUES
+	("6",
+	"Who is the most beautiful person in the world",
+	"6");
 INSERT INTO users(username,user_password,email,employee_id)
 VALUES
-	("Priya",
+	("7",
 	"$2a$12$syph3Dwqd9fflOfwU1gNq.IFQtIA.IxOgNuDPP730itRQRN/fxM0q",
-	"mod@office.com",
+	"7@office.com",
 	7);
-INSERT INTO user_roles
+INSERT INTO user_roles(username,role_id)
 VALUES
-	("Priya",1),
-	("Priya",2);
+	("7",1),
+	("7",2);
+INSERT INTO user_secrets(username,secret_question,secret_answer)
+VALUES
+	("7",
+	"When will the usiverse end?",
+	"7");
+INSERT INTO employee_incentives(employee_id)
+VALUES 
+	(1), 
+	(2), 
+	(3), 
+	(4), 
+	(5), 
+	(6), 
+	(7), 
+	(8), 
+	(9), 
+	(10);
+INSERT INTO incentive_types(id,incentive_name)
+VALUES
+	(1,"TRAVEL"),
+	(2,"OVERTIME"),
+	(3,"EQUIPMENT"),
+	(4,"ACOMPLISHMENT"),
+	(5,"OTHER");
+	
