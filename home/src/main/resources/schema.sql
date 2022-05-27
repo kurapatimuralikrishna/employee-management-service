@@ -86,6 +86,7 @@ CREATE TABLE incentive_types(
 		UNIQUE (incentive_name)
 	);
 CREATE TABLE incentives(
+	id INT PRIMARY KEY AUTO_INCREMENT,
 	employee_id INT,
 	incentive_id INT NOT NULL,
 	reason VARCHAR(100) NOT NULL,

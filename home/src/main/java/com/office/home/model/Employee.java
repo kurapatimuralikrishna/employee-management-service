@@ -9,16 +9,19 @@ public class Employee {
 	private String paymentStatus;
 	private String team;
 	private String gender;
-	public Employee(int id, String fullName, String task, int age, String annualSalary, String status, String team, String gender) {
+	private int totalIncentives;
+	public Employee(int id, String fullName, String task, int age, String annualSalary, String paymentStatus,
+			String team, String gender, int totalIncentives) {
 		super();
 		this.id = id;
 		this.fullName = fullName;
 		this.task = task;
 		this.age = age;
 		this.annualSalary = annualSalary;
-		this.paymentStatus = status;
+		this.paymentStatus = paymentStatus;
 		this.team = team;
 		this.gender = gender;
+		this.totalIncentives = totalIncentives;
 	}
 	public int getId() {
 		return id;
@@ -35,11 +38,17 @@ public class Employee {
 	public String getAnnualSalary() {
 		return annualSalary;
 	}
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
 	public String getTeam() {
 		return team;
 	}
 	public String getGender() {
 		return gender;
+	}
+	public int getTotalIncentives() {
+		return totalIncentives;
 	}
 	public void setId(int id) {
 		this.id = id;
@@ -56,9 +65,6 @@ public class Employee {
 	public void setAnnualSalary(String annualSalary) {
 		this.annualSalary = annualSalary;
 	}
-	public String getPaymentStatus() {
-		return paymentStatus;
-	}
 	public void setPaymentStatus(String paymentStatus) {
 		this.paymentStatus = paymentStatus;
 	}
@@ -67,6 +73,9 @@ public class Employee {
 	}
 	public void setGender(String gender) {
 		this.gender = gender;
+	}
+	public void setTotalIncentives(int totalIncentives) {
+		this.totalIncentives = totalIncentives;
 	}
 	@Override
 	public String toString() {

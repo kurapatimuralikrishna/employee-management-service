@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 
+import com.office.home.constants.EmployeeConstants;
 import com.office.home.dao.EmployeeDao;
 import com.office.home.model.Employee;
 
@@ -17,28 +18,10 @@ import com.office.home.model.Employee;
 public class EmployeeDaoImpl implements EmployeeDao {
 
 	private final JdbcTemplate jdbcTemplate;
-
 	@Autowired
 	public EmployeeDaoImpl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
-
-	public String sql_get_all = "SELECT \r\n" + "	employees.id,\r\n" + "    full_name AS name,\r\n"
-			+ "    t.team_name AS team,\r\n" + "    ts.instructions AS task,\r\n"
-			+ "    s.package,\r\n" + "s.payment_status AS status,\r\n"
-			+ "    a.age,\r\n" + "    g.gname AS gender\r\n" + "FROM employees\r\n" + "LEFT JOIN teams t\r\n"
-			+ "	ON team = t.team_id\r\n" + "LEFT JOIN tasks ts\r\n" + "	ON id = ts.employee_id\r\n"
-			+ "LEFT JOIN salaries s\r\n" + "	ON id = s.employee_id\r\n" + "LEFT JOIN ages a\r\n"
-			+ "	ON id = a.employee_id\r\n" + "LEFT JOIN genders g\r\n" + "	ON gender = g.id;";
-	
-	public String sql_get = "SELECT \r\n" + "	employees.id,\r\n" + "    full_name AS name,\r\n"
-			+ "    t.team_name AS team,\r\n" + "    ts.instructions AS task,\r\n"
-			+ "    s.package,\r\n" + "s.payment_status AS status,\r\n"
-			+ "    a.age,\r\n" + "    g.gname AS gender\r\n" + "FROM employees\r\n" + "LEFT JOIN teams t\r\n"
-			+ "	ON team = t.team_id\r\n" + "LEFT JOIN tasks ts\r\n" + "	ON id = ts.employee_id\r\n"
-			+ "LEFT JOIN salaries s\r\n" + "	ON id = s.employee_id\r\n" + "LEFT JOIN ages a\r\n"
-			+ "	ON id = a.employee_id\r\n" + "LEFT JOIN genders g\r\n" + "	ON gender = g.id\r\n"
-			+ " WHERE employees.id= ? ;";
 
 	@Override
 	public List<Employee> getAllEmployees() {
@@ -47,13 +30,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		ResultSetExtractor<List<Employee>> rse = (ResultSet rs) -> {
 			List<Employee> list2 = new ArrayList<>();
 			while (rs.next()) {
-				list2.add(new Employee(rs.getInt(1), rs.getString(2), rs.getString(4), rs.getInt(7), rs.getString(5), rs.getString(6), rs.getString(3), rs.getString(8)));
+				list2.add(new Employee(rs.getInt(1), rs.getString(2), rs.getString(4), rs.getInt(7), rs.getString(5), rs.getString(6), rs.getString(3), rs.getString(8), rs.getInt(9)));
 
 			}
 			return list2;
 		};
 
-		list = jdbcTemplate.query(sql_get_all, rse);
+		list = jdbcTemplate.query(EmployeeConstants.LOAD_ALL_EMPLOYEES, rse);
 		return list;
 	}
 
@@ -62,31 +45,29 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	public Employee getEmployee(int id) throws Exception {
 		ResultSetExtractor<Employee> rse = (ResultSet rs) -> {
 			if(rs.next()) {
-				return new Employee(rs.getInt(1), rs.getString(2), rs.getString(4), rs.getInt(7), rs.getString(5), rs.getString(6), rs.getString(3), rs.getString(8));
+				return new Employee(rs.getInt(1), rs.getString(2), rs.getString(4), rs.getInt(7), rs.getString(5), rs.getString(6), rs.getString(3), rs.getString(8), rs.getInt(9));
 			}
 			else return null;
 		};
 		Object[] args = {id};
 		int[] types = {Types.INTEGER};
-		return jdbcTemplate.query(sql_get,args,types,rse);
+		return jdbcTemplate.query(EmployeeConstants.LOAD_EMPLOYEE,args,types,rse);
 	}
 	
 	@Override
 	public String addEmployee(Employee emp) throws Exception {
-		String sql1 ="SELECT team_id\r\n"
-				+ "FROM teams\r\n"
-				+ "WHERE team_name = " +'"'+ emp.getTeam()+'"';
-		int teamId = jdbcTemplate.query(sql1, (ResultSet rs)->{
+		Object[] args = {emp.getTeam()};
+		int[] types = { Types.VARCHAR };
+		int teamId = jdbcTemplate.query(EmployeeConstants.LOAD_TEAM_ID_BY_NAME, args, types, (ResultSet rs) -> {
 			List<Integer> list = new ArrayList<>();
-			if(rs.next()) {
+			if (rs.next()) {
 				list.add(rs.getInt(1));
 			}
 			return list;
 		}).get(0);
-		String sql2 = "SELECT id\r\n"
-				+ "FROM genders\r\n"
-				+ "WHERE gname = " +'"'+ emp.getGender()+'"';
-		int genId = jdbcTemplate.query(sql2, (ResultSet rs)->{
+		Object[] args2 = {emp.getGender()};
+		int[] types2 = {Types.VARCHAR};
+		int genId = jdbcTemplate.query(EmployeeConstants.LOAD_GENDER_ID_BY_NAME,args2,types2, (ResultSet rs)->{
 			List<Integer> list = new ArrayList<>();
 			if(rs.next()) {
 				list.add(rs.getInt(1));
@@ -101,6 +82,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 				+ teamId +","
 				+ genId
 				+ ");");
+		jdbcTemplate.update("INSERT INTO employee_incentives VALUES ("+emp.getId()+",0)");
 		jdbcTemplate.update("INSERT INTO tasks(employee_id,instructions)\r\n"
 				+ "VALUES\r\n"
 				+ "	("
@@ -127,54 +109,53 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	@Override
 	public Employee updateEmployee(int id, Employee emp) throws Exception {
 		if(getEmployee(id)==null) throw new Exception("No such employee exists");
-		String sql1 ="SELECT team_id\r\n"
-				+ "FROM teams\r\n"
-				+ "WHERE team_name = " +'"'+ emp.getTeam()+'"';
-		int teamId = jdbcTemplate.query(sql1, (ResultSet rs)->{
+		Object[] args1 = { emp.getTeam() };
+		int[] types1 = { Types.VARCHAR };
+		int teamId = jdbcTemplate.query(EmployeeConstants.LOAD_TEAM_ID_BY_NAME, args1, types1, (ResultSet rs) -> {
 			List<Integer> list = new ArrayList<>();
-			if(rs.next()) {
+			if (rs.next()) {
 				list.add(rs.getInt(1));
 			}
 			return list;
 		}).get(0);
-		String sql2 = "SELECT id\r\n"
-				+ "FROM genders\r\n"
-				+ "WHERE gname = " +'"'+ emp.getGender()+'"';
-		int genId = jdbcTemplate.query(sql2, (ResultSet rs)->{
-			List<Integer> list = new ArrayList<>();
-			if(rs.next()) {
-				list.add(rs.getInt(1));
-			}
-			return list;
-		}).get(0);
-		Object[] args1 = {emp.getTask(),id};
-		int[] types1= {Types.VARCHAR,Types.INTEGER};
+		Object[] args2 = { emp.getGender() };
+		int[] types2 = { Types.VARCHAR };
+		int genId = jdbcTemplate
+				.query(EmployeeConstants.LOAD_GENDER_ID_BY_NAME, args2, types2, (ResultSet rs) -> {
+					List<Integer> list = new ArrayList<>();
+					if (rs.next()) {
+						list.add(rs.getInt(1));
+					}
+					return list;
+				}).get(0);
+		Object[] args3 = {emp.getTask(),id};
+		int[] types3= {Types.VARCHAR,Types.INTEGER};
 		jdbcTemplate.update("UPDATE tasks\r\n"
 				+ "SET\r\n"
 				+ "	instructions = ?\r\n"
-				+ "WHERE employee_id =?;",args1,types1);
-		Object[] args2 = {emp.getAge(),id};
-		int[] types2= {Types.INTEGER,Types.INTEGER};
+				+ "WHERE employee_id =?;",args3,types3);
+		Object[] args4 = {emp.getAge(),id};
+		int[] types4 = {Types.INTEGER,Types.INTEGER};
 		jdbcTemplate.update("UPDATE ages\r\n"
 				+ "SET\r\n"
 				+ "	age = ?\r\n"
-				+ "WHERE employee_id = ?;",args2,types2);
-		Object[] args3 = {emp.getAnnualSalary(),emp.getPaymentStatus(),id};
-		int[] types3= {Types.VARCHAR,Types.VARCHAR,Types.INTEGER};
+				+ "WHERE employee_id = ?;",args4,types4);
+		Object[] args5 = {emp.getAnnualSalary(),emp.getPaymentStatus(),id};
+		int[] types5= {Types.VARCHAR,Types.VARCHAR,Types.INTEGER};
 		jdbcTemplate.update("UPDATE salaries\r\n"
 				+ "SET\r\n"
 				+ "	package = ?,\r\n"
 				+ "    payment_status = ?\r\n"
 				+ "WHERE\r\n"
-				+ "	employee_id=?;",args3,types3);
-		Object[] args4 = {emp.getFullName(),teamId,genId,id};
-		int[] types4= {Types.VARCHAR,Types.INTEGER,Types.INTEGER,Types.INTEGER};
+				+ "	employee_id=?;",args5,types5);
+		Object[] args6 = {emp.getFullName(),teamId,genId,id};
+		int[] types6 = {Types.VARCHAR,Types.INTEGER,Types.INTEGER,Types.INTEGER};
 		jdbcTemplate.update("UPDATE employees\r\n"
 				+ "SET\r\n"
-				+ "	full_name = ?,\r\n"
+				+ "		full_name = ?,\r\n"
 				+ "    team =?,\r\n"
 				+ "    gender = ?\r\n"
-				+ "WHERE id=?;",args4,types4);
+				+ "WHERE id=?;",args6,types6);
 		return getEmployee(id);
 	}
 
@@ -184,10 +165,19 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		Employee emp = getEmployee(id);
 		Object[] args = {id};
 		int[] types= {Types.INTEGER};
-		jdbcTemplate.update("DELETE FROM tasks WHERE employee_id=?;\r\n",args,types);
-		jdbcTemplate.update("DELETE FROM salaries WHERE employee_id=?;\r\n",args,types);
-		jdbcTemplate.update("DELETE FROM ages WHERE employee_id=?;\r\n",args,types);
-		jdbcTemplate.update("DELETE FROM employees WHERE id=?;\r\n",args,types);
+		Object[] args2 = {""+id};
+		int[] types2 = {Types.VARCHAR};
+		jdbcTemplate.update("DELETE FROM incentives WHERE employee_id=?;",args,types);
+		jdbcTemplate.update("DELETE FROM employee_incentives WHERE employee_id=?;",args,types);
+		
+		jdbcTemplate.update("DELETE FROM user_secrets WHERE username=?;",args2,types2);
+		jdbcTemplate.update("DELETE FROM user_roles WHERE username=?;",args2,types2);
+		jdbcTemplate.update("DELETE FROM users WHERE username=?;",args2,types2);
+		
+		jdbcTemplate.update("DELETE FROM tasks WHERE employee_id=?;",args,types);
+		jdbcTemplate.update("DELETE FROM salaries WHERE employee_id=?;",args,types);
+		jdbcTemplate.update("DELETE FROM ages WHERE employee_id=?;",args,types);
+		jdbcTemplate.update("DELETE FROM employees WHERE id=?;",args,types);
 		return emp;
 	}
 }

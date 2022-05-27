@@ -14,11 +14,11 @@ import com.office.home.dao.UserDao;
 import com.office.home.model.User;
 
 @Component
-public class UserDaoImpl implements UserDao {
+public class AuthDaoImpl implements UserDao {
 	private final JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	public UserDaoImpl(JdbcTemplate jdbcTemplate) {
+	public AuthDaoImpl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
